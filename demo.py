@@ -2,7 +2,7 @@
 import rsa
 
 # 生成密钥
-(pubkey, privkey) = rsa.newkeys(1024)
+(pubkey, privkey) = rsa.newkeys(128)
 
 # # 保存密钥
 # with open('rsa_key/public.pem', 'w+') as f:
@@ -10,13 +10,21 @@ import rsa
 #
 # with open('rsa_key/private.pem', 'w+') as f:
 #     f.write(privkey.save_pkcs1().decode())
+pubkey_str = "-----BEGIN RSA PUBLIC KEY-----\n\
+MBgCEQCKxYviRcP6ibFvPzyUCE99AgMBAAE=\n\
+-----END RSA PUBLIC KEY-----"
+privkey_str = "-----BEGIN RSA PRIVATE KEY-----\n \
+MGMCAQACEQCKxYviRcP6ibFvPzyUCE99AgMBAAECEQCCiXEcWCQR7CQbuyl3JooB\n\
+AgkNLntTfrVKifUCCAqHF6NZqJJpAgkJ8ITaPu9hV4kCCAMq6KLezEjZAgkAkibg\n\
+II3DEe0=\n\
+-----END RSA PRIVATE KEY-----"
 
 # 导入密钥
 with open('rsa_key/public.pem', 'r') as f:
-    pubkey = rsa.PublicKey.load_pkcs1(f.read().encode())
+    pubkey = rsa.PublicKey.load_pkcs1(pubkey_str.encode())
 
 with open('rsa_key/private.pem', 'r') as f:
-    privkey = rsa.PrivateKey.load_pkcs1(f.read().encode())
+    privkey = rsa.PrivateKey.load_pkcs1(privkey_str.encode())
 
 
 caffe_path = "/home/aiserver/code/dl_pipline_v0/model/ssd/deploy.prototxt"
@@ -35,7 +43,7 @@ def rsa_encoder(in_path, out_path):
     f_model = open(out_path, "wb")
 
     while True:
-        content = ff.read(100)
+        content = ff.read(5)
         if not content:
             break
         print(content)
@@ -44,7 +52,7 @@ def rsa_encoder(in_path, out_path):
         message = content
         # 公钥加密
         crypto = rsa.encrypt(message, pubkey)
-
+        print(crypto.__len__())
         # 私钥解密
         message = rsa.decrypt(crypto, privkey)
         print(crypto.__len__())
@@ -64,7 +72,7 @@ def rsa_decoder(in_path, out_path):
     ff = open(in_path, "rb")
     f_caffe = open(out_path,"wb")
     while True:
-        content = ff.read(128)
+        content = ff.read(16)
         if not content:
             break
         #print(content)
